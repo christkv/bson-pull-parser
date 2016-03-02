@@ -78,5 +78,19 @@ describe('Parser', function() {
       var object = hydrate(buffer);
       assert.deepEqual(doc, object)
     });
+
+    it('complex nested object with array of objects', function() {
+      var doc = {'hello': ["1", {
+        'array': ["5, 6, 7"],
+        'obj': {
+          'nested': {
+            'a': ['9', '10']
+          }
+        }
+      }, "3"]};
+      var buffer = new BSON().serialize(doc);
+      var object = hydrate(buffer);
+      assert.deepEqual(doc, object)
+    });
   });
 });
