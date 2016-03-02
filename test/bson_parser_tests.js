@@ -21,7 +21,7 @@ var hydrate = function(buffer) {
   parser.setInput(buffer);
 
   // Get the eventType
-  var eventType = parser.eventType();
+  var eventType = parser.eventType;
 
   // Build the object
   var object = null;
@@ -41,8 +41,8 @@ var hydrate = function(buffer) {
           pointers.push(current);
         } else {
           pointers.push(current);
-          current[parser.name()] = {};
-          current = current[parser.name()];
+          current[parser.name] = {};
+          current = current[parser.name];
         }
 
         break;
@@ -58,24 +58,24 @@ var hydrate = function(buffer) {
         }
 
         current = pointers.pop();
-        if(dbref) current[parser.parent()] = dbref;
+        if(dbref) current[parser.parent] = dbref;
         break;
       }
       case Parser.START_ARRAY_OBJECT: {
         pointers.push(current);
-        current[parser.name()] = [];
-        current = current[parser.name()];
+        current[parser.name] = [];
+        current = current[parser.name];
         break;
       }
       case Parser.START_CODE_W_SCOPE_OBJECT: {
-        inCodeWScopeObject = parser.value();
-        current[parser.name()] = parser.value();
+        inCodeWScopeObject = parser.value;
+        current[parser.name] = parser.value;
         pointers.push(current);
         current = {}
         break;
       }
       case Parser.FIELD: {
-        current[parser.name()] = parser.value();
+        current[parser.name] = parser.value;
         break;
       }
     }
