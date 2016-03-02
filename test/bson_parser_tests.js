@@ -1,7 +1,16 @@
 var assert = require('assert'),
   f = require('util').format,
   bson = require('bson'),
+  Long = bson.Long,
+  ObjectId = bson.ObjectID,
+  Binary = bson.Binary,
   Code = bson.Code,
+  DBRef = bson.DBRef,
+  Symbol = bson.Symbol,
+  Double = bson.Double,
+  MaxKey = bson.MaxKey,
+  MinKey = bson.MinKey,
+  Timestamp = bson.Timestamp,
   BSON = bson.pure().BSON,
   Parser = require('../lib/bson_pull_parser');
 
@@ -39,15 +48,17 @@ var hydrate = function(buffer) {
         break;
       }
       case Parser.END_OBJECT: {
-        // console.log("~~~~~~~~~~~~~~~~~~~~~~~ END_OBJECT")
-        // console.dir(current)
-
         if(inCodeWScopeObject) {
           inCodeWScopeObject.scope = current;
           inCodeWScopeObject = null;
         }
 
+        if(current['$ref'] && current['$id']) {
+          var dbref = new DBRef(current['$ref'], current['$id'], current['$db']);
+        }
+
         current = pointers.pop();
+        if(dbref) current[parser.parent()] = dbref;
         break;
       }
       case Parser.START_ARRAY_OBJECT: {
@@ -57,7 +68,6 @@ var hydrate = function(buffer) {
         break;
       }
       case Parser.START_CODE_W_SCOPE_OBJECT: {
-        // console.log("~~~~~~~~~~~~~~~~~~~~~~~ START_CODE_W_SCOPE_OBJECT")
         inCodeWScopeObject = parser.value();
         current[parser.name()] = parser.value();
         pointers.push(current);
@@ -65,7 +75,6 @@ var hydrate = function(buffer) {
         break;
       }
       case Parser.FIELD: {
-        // console.log("~~~~~~~~~~~~~~~~~~~~~~~ FIELD :: " + parser.name())
         current[parser.name()] = parser.value();
         break;
       }
@@ -121,5 +130,32 @@ describe('Parser', function() {
       assert.deepEqual(doc, object)
     });
 
+    it('handle complex object with all types', function() {
+      // First doc
+      var date = new Date();
+      var oid = new ObjectId();
+      var string = 'binstring';
+      var bin = new Binary(new Buffer('binstring'));
+
+      var doc = {
+        'string': 'hello',
+        'array': [1,2,3],
+        'hash': {'a':1, 'b':2},
+        'date': date,
+        'oid': oid,
+        'binary': bin,
+        'int': 42,
+        'float': 33.3333,
+        'regexp': /regexp/,
+        'boolean': true,
+        'long': date.getTime(),
+        'where': new Code('this.a > i', {i:1}),
+        'dbref': new DBRef('namespace', oid, 'integration_tests_')
+      }
+
+      var buffer = new BSON().serialize(doc);
+      var object = hydrate(buffer);
+      assert.deepEqual(doc, object)
+    });
   });
 });
