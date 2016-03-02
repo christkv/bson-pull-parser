@@ -16,7 +16,6 @@ var hydrate = function(buffer) {
   // Build the object
   var object = null;
   var current = object;
-  var parent = null;
   var pointers = [];
 
   // Go over the document
@@ -39,16 +38,14 @@ var hydrate = function(buffer) {
         current = pointers.pop();
         break;
       }
-      case Parser.START_ARRAY: {
-        break;
-      }
-      case Parser.END_ARRAY: {
+      case Parser.START_ARRAY_OBJECT: {
+        pointers.push(current);
+        current[parser.name()] = [];
+        current = current[parser.name()];
         break;
       }
       case Parser.FIELD: {
-        // console.log("---------------------------------- FIELD " + parser.name())
         current[parser.name()] = parser.value();
-        // console.dir(current)
         break;
       }
     }
@@ -70,6 +67,13 @@ describe('Parser', function() {
 
     it('simple object with single nested document', function() {
       var doc = {'hello': { 'object': 'world' }};
+      var buffer = new BSON().serialize(doc);
+      var object = hydrate(buffer);
+      assert.deepEqual(doc, object)
+    });
+
+    it('simple object with single array field', function() {
+      var doc = {'hello': ["1", "2", "3"]};
       var buffer = new BSON().serialize(doc);
       var object = hydrate(buffer);
       assert.deepEqual(doc, object)
