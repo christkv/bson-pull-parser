@@ -1,0 +1,29 @@
+{
+  "name": "bson-pull-parser",
+  "version": "1.0.0",
+  "description": "A BSON Pull parser, optimized for low memory usage",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/christkv/bson-pull-parser.git"
+  },
+  "keywords": [
+    "bson",
+    "pull",
+    "parser",
+    "memory",
+    "efficient"
+  ],
+  "author": "Christian Amor Kvalheim",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/christkv/bson-pull-parser/issues"
+  },
+  "homepage": "https://github.com/christkv/bson-pull-parser",
+  "dependencies": {
+    "bson": "^0.4.21"
+  }
+}
